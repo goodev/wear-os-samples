@@ -18,20 +18,10 @@ package com.example.wear.tiles.fitness
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.TileProviderService
 import androidx.wear.tiles.builders.ColorBuilders.argb
-import androidx.wear.tiles.builders.DimensionBuilders.degrees
-import androidx.wear.tiles.builders.DimensionBuilders.dp
-import androidx.wear.tiles.builders.DimensionBuilders.sp
-import androidx.wear.tiles.builders.LayoutElementBuilders.ARC_ANCHOR_START
-import androidx.wear.tiles.builders.LayoutElementBuilders.Arc
-import androidx.wear.tiles.builders.LayoutElementBuilders.ArcLine
-import androidx.wear.tiles.builders.LayoutElementBuilders.Box
-import androidx.wear.tiles.builders.LayoutElementBuilders.Column
-import androidx.wear.tiles.builders.LayoutElementBuilders.FontStyle
-import androidx.wear.tiles.builders.LayoutElementBuilders.FontStyles
-import androidx.wear.tiles.builders.LayoutElementBuilders.Layout
-import androidx.wear.tiles.builders.LayoutElementBuilders.Spacer
-import androidx.wear.tiles.builders.LayoutElementBuilders.Text
-import androidx.wear.tiles.builders.ResourceBuilders.Resources
+import androidx.wear.tiles.builders.DimensionBuilders.*
+import androidx.wear.tiles.builders.LayoutElementBuilders.*
+import androidx.wear.tiles.builders.ModifiersBuilders.*
+import androidx.wear.tiles.builders.ResourceBuilders.*
 import androidx.wear.tiles.builders.TileBuilders.Tile
 import androidx.wear.tiles.builders.TimelineBuilders.Timeline
 import androidx.wear.tiles.builders.TimelineBuilders.TimelineEntry
@@ -49,6 +39,8 @@ import kotlinx.coroutines.guava.future
 // resources, the contents of which change even though their id stays the same (e.g. a graph).
 // In this sample, our resources are all fixed, so we use a constant value.
 private const val RESOURCES_VERSION = "1"
+
+private const val ID_IC_RANK_BG = "ic_rank_bg"
 
 // dimensions
 private val PROGRESS_BAR_THICKNESS = dp(6f)
@@ -89,9 +81,13 @@ class FitnessTileService : TileProviderService() {
     }
 
     override fun onResourcesRequest(requestParams: ResourcesRequest): ListenableFuture<Resources> =
-        Futures.immediateFuture(
-            Resources.builder().setVersion(RESOURCES_VERSION).build()
-        )
+            Futures.immediateFuture(
+                    Resources.builder().setVersion(RESOURCES_VERSION)
+                            .addIdToImageMapping(ID_IC_RANK_BG, ImageResource.builder()
+                                    .setAndroidResourceByResid(AndroidImageResourceByResId.builder()
+                                            .setResourceId(R.drawable.ic_rank_bg_gold)))
+                            .build()
+            )
 
     override fun onDestroy() {
         super.onDestroy()
@@ -114,22 +110,41 @@ class FitnessTileService : TileProviderService() {
                     .setAnchorType(ARC_ANCHOR_START)
             )
             .addContent(
-                Column.builder()
-                    .addContent(
-                        Text.builder()
-                            .setText(goalProgress.current.toString())
-                            .setFontStyle(
-                                FontStyle.builder().setSize(sp(44f)).build()
+                    Column.builder()
+                            .addContent(
+                                    Text.builder()
+                                            .setText(goalProgress.current.toString())
+                                            .setFontStyle(
+                                                    FontStyle.builder().setSize(sp(44f)).build()
+                                            )
+                                            .setFontStyle(fontStyles.display2())
                             )
-                            .setFontStyle(fontStyles.display2())
-                    )
-                    .addContent(
-                        Text.builder()
-                            .setText(resources.getString(R.string.goal, goalProgress.goal))
-                            .setFontStyle(
-                                FontStyle.builder().setSize(sp(44f)).build()
+                            .addContent(
+                                    Box.builder()
+                                            .setModifiers(Modifiers.builder()
+                                                    .setBackground(Background.builder()
+                                                            .setColor(argb(0x4400FF00))))
+                                            .setHeight(wrap())
+                                            .setWidth(wrap())
+                                            .addContent(
+                                                    Image.builder()
+                                                            .setContentScaleMode(CONTENT_SCALE_MODE_FILL_BOUNDS)
+                                                            .setHeight(expand())
+                                                            .setWidth(expand())
+                                                            .setResourceId(ID_IC_RANK_BG)
+
+                                            )
+                                            .addContent(
+                                                    Text.builder()
+                                                            .setModifiers(Modifiers.builder()
+                                                                    .setPadding(Padding.builder()
+                                                                            .setTop(dp(8f))
+                                                                            .setBottom(dp(8f))
+                                                                            .setStart(dp(8f))
+                                                                            .setEnd(dp(8f))))
+                                                            .setText(resources.getString(R.string.goal, goalProgress.goal))
+                                                            .setFontStyle(fontStyles.title3()))
+
                             )
-                            .setFontStyle(fontStyles.title3())
-                    )
             )
 }
